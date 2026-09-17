@@ -1,177 +1,174 @@
 from collections import defaultdict, deque
-import numpy as np
 from enum import Enum
+from typing import Dict, Set, Tuple, List, TypeVar, Hashable, Iterable, Generic, Optional
+from dataclasses import dataclass
+
+
+#TODO
+# Add typehints
+# Add docstrings
+# Create explanation
+# ZZzzzZzz
+
+
+# Type definitions
+State = Tuple[int, ...]
+Node = TypeVar("Node", bound=Hashable)
+Transition = TypeVar("Transition")
+
+@dataclass(frozen=True)
 class LockConfiguration:
     """ how many sliders and what are the dependencies between them"""
-    rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)}
-    min = 0
-    max = 6
+   # rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)}
+    rules : Dict[int, Tuple[int, ...]]
+    min_bound : int = 0
+    max_bound : int = 6
 
-
-
-class LockState:
+@dataclass(frozen=True)
+class LockStartState:
     """ current state of the lock:
-        - e.g [0, 2, 2, 4, 5] for a lock with 5 sliders, not solved,
-        - or [2, 2, 2, 2] for a lock with 4 sliders, solved"""
-    state = (1, 2, 6)
-
+        - e.g (0, 2, 2, 4, 5) for a lock with 5 sliders, not solved,
+        - or (2, 2, 2, 2) for a lock with 4 sliders, solved"""
+    state : Tuple
 
 
 class Direction(Enum):
-    """+1 is Right, -1 is Left"""
-    RIGHT = 1
-    LEFT = -1
+    RIGHT = 'R'
+    LEFT = 'L'
 
+@dataclass(frozen=True)
 class Move:
     "a single move, e.g. for first slider: (0, Direction.RIGHT)"
-    def __init__(self):
-        return
+    slider_idx: int
+    direction: Direction
+
+    def __str__(self) -> str:
+        return f"{self.slider_idx+1}{self.direction.value}"
     
-class Graph():
+class Graph:
     """Unweighted graph implementation"""
 
-    def __init__(self, is_directed=False):
-        self.graph = defaultdict(set)
-        self.generated_nodes = set()
+    def __init__(self, config: LockConfiguration):
+        self.config = config
+
+    def validate_state(self, state: State) -> None:
+        """Verifies if lock is within its physical limits"""
+        if not state:
+            raise ValueError("State cannot be empty.")
         
-        self.is_directed = is_directed
-        self.stack = []
+        for val in state:
+            if not(self.config.min_bound <= val <= self.config.max_bound):
+                raise ValueError(
+                    f"State value {val} is out of bounds: [{self.config.min_bound}; {self.config.max_bound}]"
+                )
 
-    def add_node(self, a, b):
-        self.graph[a].add(b)
-        if not self.is_directed:
-            self.graph[b].add(a)
-
-    def is_move_possible(self, val, rule, add):
-        if add:
-            return LockConfiguration.min <= val + rule <= LockConfiguration.max
-        else:
-            return LockConfiguration.min <= val - rule <= LockConfiguration.max
-         
-
-    def add_neighbour(self, node, rule_tuple, add):
-        new = ()
+    def get_neighbours(self, state: State) -> Iterable[Tuple[State, Move]]:
+        # 17.09.2026 -> Completely rewritten logic // using yield instead of return for dynamical graph solving
+        # merged add_neighbour and generate_graph logic
+        # removed obsolete methods add_left and add_right
+        # Graph class is no longer using recursion
         
-        for val, rule in zip(node, rule_tuple):
-            if self.is_move_possible(val=val, rule=rule, add=add): 
-                new_val = val + rule if add else val - rule
-                new += (new_val,)
-            else:
-                new = ()
-                break
+        for rule_idx, rule_tuple in self.config.rules.items():
+            for direction in (Direction.LEFT, Direction.RIGHT):
+                mul = 1 if direction == Direction.RIGHT else -1
+                new_lock_state: List[int] = []
+                lock_valid: bool = True
 
-        if new not in self.generated_nodes:
-            self.add_node(node, new) 
-            self.stack.append(new)
+                for value, diff in zip(state, rule_tuple):
+                    new_val = value + mul*diff
+                    if not (self.config.min_bound <= new_val <= self.config.max_bound):
+                        lock_valid = False
+                        break
+                    new_lock_state.append(new_val)
+                if lock_valid:
+                    yield tuple(new_lock_state), Move(slider_idx=rule_idx, direction=direction)
 
-    def add_left(self, node, rule_tuple):
-        self.add_neighbour(node, rule_tuple, add=False)
 
-    def add_right(self, node, rule_tuple):
-        self.add_neighbour(node, rule_tuple, add=True)
+    # Changed the way graph is (and if) built and printed for debugging purposes -> we dont really need to create the adjacency list (dict) for our solution
 
-    def generate_graph(self, node):
-        if node in self.generated_nodes: return
-        self.generated_nodes.add(node)        
-        #print(node, LockConfiguration.rules.values())
-        for rule_tuple in LockConfiguration.rules.values():
-            self.add_left(node, rule_tuple)
-            self.add_right(node, rule_tuple)
-            
-        if self.stack == []: return   
-            
-        node = self.stack.pop()
-        self.generate_graph(node)
+    def build_graph(self, start: LockStartState) -> Dict[State, List[Tuple[State, str]]]:
+        self.validate_state(start.state)
+        adjacency_dict: Dict[State, List[Tuple[State, str]]] = {}
+        visited: Set[State] = {start.state}
+        queue: deque[State] = deque([start.state])
 
-    def __str__(self):
-        return f'{str(self.__class__.__name__)}{str(dict(self.graph))}'
+        while queue:
+            current_state = queue.popleft()
+            adjacency_dict[current_state] = []
 
-class Solution(Graph):
-    def __init__(self):
-        """generate a graph based on LockConfiguration and LockState"""
-        super().__init__(is_directed=False)
-        self.solved = False
-        self.solvable = False
-        self.solution_nodes = []
-        self.solution_moves = []
-        self.move_list = []
-        self.start = LockState.state
-        self.parent_of = {self.start: None}
-        self.goal = tuple(2 for _ in range(len(self.start)))
-        return
+            for neighbour, move in self.get_neighbours(current_state):
+                adjacency_dict[current_state].append((neighbour, move))
+                if neighbour not in visited:
+                    visited.add(neighbour)
+                    queue.append(neighbour)
 
-    def is_lock_solvable(self):
-        """Checks if the lock is within constrains and has a solution."""
-        return self.solvable
+        return adjacency_dict
 
-    def is_lock_solved(self):
-        return self.solved
+    def __repr__(self):
+        return f"{self.__class__.__name__}({self.config})"
 
-    def bfs(self):
-        """BFS for possible moves"""
+    
+class Solution(Generic[Node, Transition]):
+    def __init__(self, end_state):
+        self.goal = end_state
+
+    def bfs(self, graph, start) -> Optional[Tuple[List[Node], List[Transition]]]:
+        graph.validate_state(start.state)
+        if start.state == self.goal:
+            return [start.state], []
+        
+        queue = deque([start.state])
         visited_nodes = set()
-        queue = deque([self.start])
-        visited_nodes.add(self.start)
-
+        visited_nodes.add(start.state)
+        parent_of : Dict[Node, Tuple[Node, Transition]] = {}
+        
+        lock_solved = False
         while queue:
             current_node = queue.popleft()
             if current_node == self.goal:
+                lock_solved = True
                 break
 
-            for child_node in self.graph[current_node]:
+            for child_node, move in graph.get_neighbours(state=current_node):
                 if child_node not in visited_nodes:
                     visited_nodes.add(child_node)
-                    self.parent_of[child_node] = current_node
+                    parent_of[child_node] = (current_node, move)
                     queue.append(child_node)
 
+        if not lock_solved:
+            return None
 
-    def get_shortest_path(self):   
-        if self.goal not in self.parent_of:
-            print(self.parent_of)
-            self.solvable = False
-            self.solved = False
-            return
-        self.solvable = True
         node = self.goal 
-        self.res = [] #TEMPORARY
-        while node is not None:
-            self.res.append(node)
-            if self.parent_of[node] is not None:
-                direction = np.subtract(node, self.parent_of[node])
-                self.solution_moves.append(direction)
-            node = self.parent_of[node]
-        self.res.reverse()
-    def create_moves_list(self):
-        #TODO: SUPER UGLY
-        if not self.solvable: return # Lock is not yet solved, cannot return solution moves
-        self.solution_moves.reverse()
-        for move in self.solution_moves:
-            for j in range(len(LockConfiguration.rules)):
-                if tuple(move) == list(LockConfiguration.rules.values())[j]:
-                    self.move_list.append(f'{j+1}R')
-                    break
-                elif tuple(move) == tuple(-np.array(list(LockConfiguration.rules.values())[j])):
-                    self.move_list.append(f'{j+1}L')
-                    break
+        solution_states : List[Node] = []
+        solution_moves : List[Transition] = []
+
+        while node != start.state:
+            solution_states.append(node)
+            prev_node, direction = parent_of[node]
+            solution_moves.append(direction)
+            node = prev_node
+
+        solution_states.append(start.state)
+        solution_states.reverse()
+        solution_moves.reverse()
+
+        return solution_states, solution_moves
 
         
-        self.solved = True
-
-    def solve_lock(self):
-        print('Generating graph...')
-        self.generate_graph(self.start)
-        print('BFS...')
-        self.bfs()
-        print('Getting shortest path...')
-        self.get_shortest_path()
-        print('Creating moves list...')
-        self.create_moves_list()
-        print('Done!')
-        
 
 
+if __name__ == "__main__":
+    config = LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    start = LockStartState(state = (1, 2, 6))
+    end = tuple(2 for _ in range(len(config.rules.items())))
+    graph = Graph(config=config)
+    solver = Solution(end_state=end)
+    path = solver.bfs(graph=graph, start=start)
+    
 
-solver = Solution()
-solver.solve_lock()
-print(solver.res)
-print(solver.move_list)
+    
+    adj_dict = graph.build_graph(start=start)
+    # print(adj_dict)
+    # print(graph)
+    print(path)
+    
