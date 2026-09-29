@@ -111,20 +111,44 @@ def test_configuration_type_constraint():
     with pytest.raises(TypeError):
         config = app.LockConfiguration(rules={0: (0), 1: (1), 2: (0)})
 
-
-#TODO add tests:
-
 def test_empty_state():
     """Empty state tuple should raise ValueError."""
-    pass
+    start = app.LockStartState(state = ())
+    config = app.LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    graph = app.Graph(config=config)
+    with pytest.raises(ValueError):
+        graph.validate_state(start.state)
 
 def test_state_bounds():
     """States below min_bounds or above max_bounds should be DESTROYED (raise ValueError)."""
-    pass
+    state = (0, 0, -1)
+    config = app.LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    graph = app.Graph(config=config)
+    with pytest.raises(ValueError):
+        graph.validate_state(state)
 
 def test_expected_neighbours():
     """Tests if a state gets expected amount of neighbours."""
-    pass
+    state = (0, 3, 6)
+    config = app.LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    graph = app.Graph(config=config)
+    neighbour_amnt = 0
+    for n, _ in graph.get_neighbours(state=state):  # (1, 3, 6), (0, 2, 5)
+        neighbour_amnt += 1
+    assert neighbour_amnt == 2
+
+def test_solved_start_state():
+    """Test if solved start state immediately returns solution."""
+    solved_lock = (3, 3, 3)
+    start = app.LockStartState(state = (3, 3, 3))
+    config = app.LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    graph = app.Graph(config=config)
+    solver = app.Solution(end_state=solved_lock)
+    result = solver.bfs(graph=graph, start=start)
+    assert result == ([solved_lock], [])
+    
+#TODO add tests:
+
 def test_movement_filtration():
     """Test if movements pushing values of out bounds are correctly ANNIHILATED."""
     pass
@@ -134,12 +158,11 @@ def test_build_graph():
     pass
 
 def test_build_graph():
-    """Test if infinite is possible (how? idk yet:P)"""
+    """Test if infinite loop is possible (how? idk yet:P)"""
     pass
 
-def test_solved_start_state():
-    """Test if solved start state immediately returns solution."""
-    pass
+
+
 
 #Test some known solutions to check for algorithm limitations
 
