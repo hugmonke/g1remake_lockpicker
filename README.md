@@ -90,19 +90,29 @@ After cloning repo's main branch, you can start the app:
         5
       ],
       [
-        4,
+        6,
         2,
+        5
+      ],
+      [
+        6,
+        3,
+        6
+      ],
+      [
+        5,
+        3,
+        5
+      ],
+      [
+        4,
+        3,
         4
       ],
       [
         3,
-        2,
+        3,
         3
-      ],
-      [
-        2,
-        2,
-        2
       ]
     ],
     [
@@ -129,6 +139,14 @@ After cloning repo's main branch, you can start the app:
       {
         "slider_idx": 2,
         "direction": "L"
+      },
+      {
+        "slider_idx": 0,
+        "direction": "R"
+      },
+      {
+        "slider_idx": 1,
+        "direction": "R"
       },
       {
         "slider_idx": 2,

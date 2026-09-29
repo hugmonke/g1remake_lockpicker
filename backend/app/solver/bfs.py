@@ -2,7 +2,7 @@ from collections import defaultdict, deque
 from enum import Enum
 from typing import Dict, Set, Tuple, List, TypeVar, Hashable, Iterable, Generic, Optional
 from dataclasses import dataclass
-
+from types import MappingProxyType
 
 #TODO
 # Add typehints
@@ -18,17 +18,44 @@ Transition = TypeVar("Transition")
 
 @dataclass(frozen=True)
 class LockConfiguration:
-    """ how many sliders and what are the dependencies between them"""
+    """ How many sliders and what are the dependencies between them"""
    # rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)}
     rules : Dict[int, Tuple[int, ...]]
     min_bound : int = 0
     max_bound : int = 6
 
+    def __post_init__(self):
+        if self.rules:
+            iterator = iter(self.rules.values())
+            key_length = len(self.rules.keys())
+            first_rule = next(iterator)
+
+            
+            if not isinstance(first_rule, tuple): raise TypeError("Bad ruleset: Each rule must be a tuple!")
+            rule_length = len(next(iterator))
+
+            if key_length != rule_length:
+                raise ValueError("Bad ruleset: Rule length must match slider amount!")
+            
+            for rule in iterator:
+                if len(rule) != rule_length:
+                    raise ValueError("Bad ruleset: All rule tuples must be the same length!")
+
+            if rule_length > self.max_bound+1 or rule_length == 0:
+                    raise ValueError(f"Bad ruleset: Wrong amount of rules! Got {rule_length} rules")
+            
+        for rule in self.rules.values():
+            for val in rule:
+                if val != 0 and abs(val) != 1:
+                    raise ValueError(f"Bad ruleset: Slider cannot move more than one hole per cycle!")
+        # Bypass frozen=True to make immutable dictionary
+        object.__setattr__(self, 'rules', MappingProxyType({key: tuple(val) for key, val in self.rules.items()}))
+
 @dataclass(frozen=True)
 class LockStartState:
     """ current state of the lock:
         - e.g (0, 2, 2, 4, 5) for a lock with 5 sliders, not solved,
-        - or (2, 2, 2, 2) for a lock with 4 sliders, solved"""
+        - or (3, 3, 3, 3) for a lock with 4 sliders, solved"""
     state : Tuple
 
 
@@ -42,6 +69,10 @@ class Move:
     slider_idx: int
     direction: Direction
 
+    def __post_init__(self):
+        if not (LockConfiguration.min_bound <= self.slider_idx <= LockConfiguration.max_bound):
+            raise ValueError(f"slider_idx must be in range [0, 6], got {self.slider_idx}")
+        
     def __str__(self) -> str:
         return f"{self.slider_idx+1}{self.direction.value}"
     
@@ -160,7 +191,7 @@ class Solution(Generic[Node, Transition]):
 if __name__ == "__main__":
     config = LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
     start = LockStartState(state = (1, 2, 6))
-    end = tuple(2 for _ in range(len(config.rules.items())))
+    end = tuple(3 for _ in range(len(config.rules.items())))
     graph = Graph(config=config)
     solver = Solution(end_state=end)
     path = solver.bfs(graph=graph, start=start)
@@ -171,4 +202,3 @@ if __name__ == "__main__":
     # print(adj_dict)
     # print(graph)
     print(path)
-    
