@@ -4,13 +4,6 @@ from typing import Dict, Set, Tuple, List, TypeVar, Hashable, Iterable, Generic,
 from dataclasses import dataclass
 from types import MappingProxyType
 
-#TODO
-# Add typehints
-# Add docstrings
-# Create explanation
-# ZZzzzZzz
-
-
 # Type definitions
 State = Tuple[int, ...]
 Node = TypeVar("Node", bound=Hashable)
@@ -43,11 +36,14 @@ class LockConfiguration:
 
             if rule_length > self.max_bound+1 or rule_length == 0:
                     raise ValueError(f"Bad ruleset: Wrong amount of rules! Got {rule_length} rules")
+
             
-        for rule in self.rules.values():
-            for val in rule:
-                if val != 0 and abs(val) != 1:
+        for key, rule in self.rules.items():
+            for i in range(len(rule)):
+                if rule[i] != 0 and abs(rule[i]) != 1:
                     raise ValueError(f"Bad ruleset: Slider cannot move more than one hole per cycle!")
+                if key == i and rule[i] != 1:
+                    raise ValueError(f"Bad ruleset: Slider must be movable!")
         # Bypass frozen=True to make immutable dictionary
         object.__setattr__(self, 'rules', MappingProxyType({key: tuple(val) for key, val in self.rules.items()}))
 
@@ -57,7 +53,6 @@ class LockStartState:
         - e.g (0, 2, 2, 4, 5) for a lock with 5 sliders, not solved,
         - or (3, 3, 3, 3) for a lock with 4 sliders, solved"""
     state : Tuple
-
 
 class Direction(Enum):
     RIGHT = 'R'
@@ -71,7 +66,7 @@ class Move:
 
     def __post_init__(self):
         if not (LockConfiguration.min_bound <= self.slider_idx <= LockConfiguration.max_bound):
-            raise ValueError(f"slider_idx must be in range [0, 6], got {self.slider_idx}")
+            raise ValueError(f"slider_idx must be in range [{LockConfiguration.min_bound}, {LockConfiguration.max_bound}], got {self.slider_idx}.")
         
     def __str__(self) -> str:
         return f"{self.slider_idx+1}{self.direction.value}"
@@ -86,19 +81,21 @@ class Graph:
         """Verifies if lock is within its physical limits"""
         if not state:
             raise ValueError("State cannot be empty.")
+
+        rules_length = len(next(iter(self.config.rules.values())))
+        state_length = len(state)
+        if state_length != rules_length:
+            raise ValueError(
+                f"State length {state_length} does not match lock dimensions ({rules_length})."
+            )
         
         for val in state:
             if not(self.config.min_bound <= val <= self.config.max_bound):
                 raise ValueError(
-                    f"State value {val} is out of bounds: [{self.config.min_bound}; {self.config.max_bound}]"
+                    f"State value must be in range [{LockConfiguration.min_bound}, {LockConfiguration.max_bound}], got {val}.]"
                 )
 
     def get_neighbours(self, state: State) -> Iterable[Tuple[State, Move]]:
-        # 17.09.2026 -> Completely rewritten logic // using yield instead of return for dynamical graph solving
-        # merged add_neighbour and generate_graph logic
-        # removed obsolete methods add_left and add_right
-        # Graph class is no longer using recursion
-        
         for rule_idx, rule_tuple in self.config.rules.items():
             for direction in (Direction.LEFT, Direction.RIGHT):
                 mul = 1 if direction == Direction.RIGHT else -1
@@ -147,6 +144,7 @@ class Solution(Generic[Node, Transition]):
         graph.validate_state(start.state)
         if start.state == self.goal:
             return [start.state], []
+
         
         queue = deque([start.state])
         visited_nodes = set()
@@ -189,8 +187,11 @@ class Solution(Generic[Node, Transition]):
 
 
 if __name__ == "__main__":
-    config = LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
-    start = LockStartState(state = (1, 2, 6))
+    start = LockStartState(state=(1, 1, 4, 6, 2, 3, 3))
+    config = LockConfiguration(rules = {0: (1, 0, 0, -1, 0, 0, 0), 1: (0, 1, 0, 0, 0, 0, 0), 2: (0, 0, 1, 0, 0, 0, 0), 3: (-1, 0, 0, 1, 0, 0, 0),
+                                        4: (0, 0, 0, 0, 1, 0, 0), 5: (0, 0, 0, 0, 0, 1, 0), 6: (0, 0, 0, 0, 0, 0, 1)})
+    #config = LockConfiguration(rules = {0: (1, 0, 0), 1: (0, 1, 1), 2: (1, 0, 1)})
+    #start = LockStartState(state = (1, 2, 6))
     end = tuple(3 for _ in range(len(config.rules.items())))
     graph = Graph(config=config)
     solver = Solution(end_state=end)
@@ -202,3 +203,12 @@ if __name__ == "__main__":
     # print(adj_dict)
     # print(graph)
     print(path)
+
+    state = (0, 1, 4, 6, 2, 3, 3)
+    config = LockConfiguration(rules = {0: (1, 0, 0, -1, 0, 0, 0), 1: (0, 1, 0, 0, 0, 0, 0), 2: (0, 0, 1, 0, 0, 0, 0), 3: (-1, 0, 0, 1, 0, 0, 0),
+                                            4: (0, 0, 0, 0, 1, 0, 0), 5: (0, 0, 0, 0, 0, 1, 0), 6: (0, 0, 0, 0, 0, 0, 1)})
+    graph = Graph(config=config)
+    res = []
+    for n, _ in graph.get_neighbours(state=state):
+        res.append(n)
+    print(res)

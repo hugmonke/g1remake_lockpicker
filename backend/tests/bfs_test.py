@@ -4,12 +4,7 @@ import sys
 from dataclasses import FrozenInstanceError
 import app.solver.bfs as app
 
-# wip
-# currently only testing Move class
-# check out of bounds
-# 
 @pytest.mark.parametrize("slider_idx,direction,expected_str", [(0, app.Direction.RIGHT, "1R"), (0, app.Direction.LEFT, "1L"), (4, app.Direction.RIGHT, "5R")])
-
 def test_move_formatting(slider_idx, direction, expected_str):
     """Move output should display idx+1 and direction char (R, L)."""
     move = app.Move(slider_idx=slider_idx, direction=direction)
@@ -66,25 +61,22 @@ def test_state_equality_and_hashability():
 
 def test_configuration_immutability():
     """Modifying LockConfiguration properties should raise FrozenInstanceError."""
-    config = app.LockConfiguration(rules={0: (0, 1, 0), 1: (1, 1, 1), 2: (0, 0, 0)})
+    config = app.LockConfiguration(rules={0: (1, 1, 0), 1: (1, 1, 1), 2: (0, 0, 1)})
     with pytest.raises(FrozenInstanceError):
-        config.rules = {0: (0, 1, 0)}
+        config.rules = {0: (1, 0, 0)}
 
-def test_configuration_immutability():
-    """Modifying LockConfiguration properties should raise FrozenInstanceError."""
-    config = app.LockConfiguration(rules={0: (0, 1, 0), 1: (1, 1, 1), 2: (0, 0, 0)})
-    with pytest.raises(FrozenInstanceError):
-        config.rules = {0: (0, 1, 0)}
-
+def test_configuration_bounds_immutability():
+    """Modifying LockConfiguration bounds should raise FrozenInstanceError."""
+    config = app.LockConfiguration(rules={0: (1, 1, 0), 1: (1, 1, 1), 2: (0, 0, 1)})
     with pytest.raises(FrozenInstanceError):
         config.min_bound = -1
         config.max_bound = 7
 
 def test_configuration_rules_immutability():
     """Modifying LockConfiguration rules values should raise TypeError."""
-    config = app.LockConfiguration(rules={0: (0, 1, 0), 1: (1, 1, 1), 2: (0, 0, 0)})
+    config = app.LockConfiguration(rules={0: (1, 1, 0), 1: (1, 1, 1), 2: (0, 0, 1)})
     with pytest.raises(TypeError):
-        config.rules[0] = (0, 2, 0)
+        config.rules[0] = (0, 1, 0)
 
 def test_configuration_bounds():
     """Bad LockConfiguration rules bounds should raise ValueError."""
@@ -147,25 +139,213 @@ def test_solved_start_state():
     result = solver.bfs(graph=graph, start=start)
     assert result == ([solved_lock], [])
     
-#TODO add tests:
 
 def test_movement_filtration():
     """Test if movements pushing values of out bounds are correctly ANNIHILATED."""
-    pass
+    state = (0, 1, 4, 6, 2, 3, 3)
+    config = app.LockConfiguration(rules = {0: (1, 0, 0, -1, 0, 0, 0), 1: (0, 1, 0, 0, 0, 0, 0), 2: (0, 0, 1, 0, 0, 0, 0), 3: (-1, 0, 0, 1, 0, 0, 0),
+                                            4: (0, 0, 0, 0, 1, 0, 0), 5: (0, 0, 0, 0, 0, 1, 0), 6: (0, 0, 0, 0, 0, 0, 1)})
+    graph = app.Graph(config=config)
+    res = []
+    for n, _ in graph.get_neighbours(state=state):
+        res.append(n)
+    assert res == [(1, 1, 4, 5, 2, 3, 3), (0, 0, 4, 6, 2, 3, 3), (0, 2, 4, 6, 2, 3, 3),
+                    (0, 1, 3, 6, 2, 3, 3), (0, 1, 5, 6, 2, 3, 3), (1, 1, 4, 5, 2, 3, 3),
+                    (0, 1, 4, 6, 1, 3, 3), (0, 1, 4, 6, 3, 3, 3), (0, 1, 4, 6, 2, 2, 3),
+                    (0, 1, 4, 6, 2, 4, 3), (0, 1, 4, 6, 2, 3, 2), (0, 1, 4, 6, 2, 3, 4)]
+
 
 def test_build_graph():
     """Test correctness of adjacency dictionary from build_graph method."""
-    pass
+    config = app.LockConfiguration(rules={0: (1, 0), 1: (0, 1)}, min_bound=0, max_bound=2)
+    graph = app.Graph(config=config)
+    start = app.LockStartState(state=(0, 0))
 
-def test_build_graph():
-    """Test if infinite loop is possible (how? idk yet:P)"""
-    pass
+    adj_dict = graph.build_graph(start=start)
+
+    assert isinstance(adj_dict, dict)
+    assert (0, 0) in adj_dict
+    
+    neighbours = adj_dict[(0, 0)]
+    neighbour_states = {n_state for n_state, _ in neighbours}
+    
+    assert (1, 0) in neighbour_states
+    assert (0, 1) in neighbour_states
+
+def test_start_bounds():
+    """Test that passing an out of bounds start state directly into Solution.bfs triggers a ValueError through state validation."""
+    start = app.LockStartState(state=(-1, 1, 4, 6, 2, 3, 3))
+    config = app.LockConfiguration(rules = {0: (1, 0, 0, -1, 0, 0, 0), 1: (0, 1, 0, 0, 0, 0, 0), 2: (0, 0, 1, 0, 0, 0, 0), 3: (-1, 0, 0, 1, 0, 0, 0),
+                                            4: (0, 0, 0, 0, 1, 0, 0), 5: (0, 0, 0, 0, 0, 1, 0), 6: (0, 0, 0, 0, 0, 0, 1)})
+    end = tuple(3 for _ in range(len(config.rules.items())))
+    graph = app.Graph(config=config)
+    solver = app.Solution(end_state=end)
+    with pytest.raises(ValueError):
+        solver.bfs(graph=graph, start=start)
+
+TEST_10_CASES = [
+    # 1: all independent 
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (0, 1, 2, 3, 4, 5, 6),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 2: already solved
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (3, 3, 3, 3, 3, 3, 3),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 3: simple opposite couples
+    (
+        {
+            0: (1, 0, 0, -1, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, -1, 0),
+            3: (-1, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 1, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (0, 1, 4, 6, 2, 3, 3),
+        (None),
+    ),
+    # 4: all zeroes
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (0, 0, 0, 0, 0, 0, 0),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 5: all sixes
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (6, 6, 6, 6, 6, 6, 6),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 6: 0 moves 1, 1 moves 2 ...
+    (
+        {
+            0: (1, 1, 0, 0, 0, 0, 0),
+            1: (0, 1, 1, 0, 0, 0, 0),
+            2: (0, 0, 1, 1, 0, 0, 0),
+            3: (0, 0, 0, 1, 1, 0, 0),
+            4: (0, 0, 0, 0, 1, 1, 0),
+            5: (0, 0, 0, 0, 0, 1, 1),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (1, 1, 1, 1, 1, 1, 1),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 7: mixed coupling
+    (
+        {
+            0: (1, -1, 0, 0, 0, 0, 0),
+            1: (0, 1, 1, 0, 0, 0, 0),
+            2: (0, 0, 1, -1, 0, 0, 0),
+            3: (0, 0, 0, 1, 1, 0, 0),
+            4: (0, 0, 0, 0, 1, -1, 0),
+            5: (0, 0, 0, 0, 0, 1, 1),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (2, 4, 2, 4, 2, 4, 3),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 8: 
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, -1),
+            1: (0, 1, 0, 0, 0, -1, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 0, 1, 0, 0, 0),
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (1, 0, 0, 0, 0, 0, 1),
+        },
+        (2, 2, 2, 2, 2, 2, 2),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+
+    # 9
+    (
+        {
+            0: (1, 0, 0, 0, 0, 0, 0),
+            1: (0, 1, 0, 0, 0, 0, 0),
+            2: (0, 0, 1, 0, 0, 0, 0),
+            3: (0, 0, 1, 1, 1, 0, 0), 
+            4: (0, 0, 0, 0, 1, 0, 0),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (1, 2, 1, 2, 1, 2, 3),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+    # 10:
+    (
+        {
+            0: (1, 0, 1, 0, 0, 0, 0),
+            1: (0, 1, 0, 1, 0, 0, 0),
+            2: (0, 0, 1, 0, 1, 0, 0),
+            3: (0, 0, 0, 1, 0, 1, 0),
+            4: (0, 0, 0, 0, 1, 0, 1),
+            5: (0, 0, 0, 0, 0, 1, 0),
+            6: (0, 0, 0, 0, 0, 0, 1),
+        },
+        (1, 5, 1, 5, 1, 5, 1),
+        (3, 3, 3, 3, 3, 3, 3),
+    ),
+]
+
+@pytest.mark.parametrize("rules, start_state, end_state", TEST_10_CASES)
+def test_lock_solver_7_sliders(rules, start_state, end_state):
+    """Testing solvability of 10 different lock configurations."""
+    config = app.LockConfiguration(rules=rules, min_bound=0, max_bound=6)
+    graph = app.Graph(config=config)
+    start = app.LockStartState(state=start_state)
+    solver = app.Solution(end_state=end_state)
+    result = solver.bfs(graph=graph, start=start)
+
+    if end_state is None:
+        assert result is None
+        return
+
+    assert result is not None, "Unexpected: Solver returned None."
+    solution_states, solution_moves = result
+
+    assert solution_states[0] == start_state
+    assert solution_states[-1] == end_state
+    assert len(solution_states) == len(solution_moves)+1
 
 
 
-
-#Test some known solutions to check for algorithm limitations
-
-#Test some impossible configuration
-
-#Test that passing an out of bounds start state directly into Solution.bfs triggers a ValueError through state validation.
