@@ -1,11 +1,17 @@
 # g1remake_lockpicker
 
+## Prerequisites
+
+1. This project is developed on Python 3.13.5.
+2. Node.js v24.21.0 (https://nodejs.org/en/download/).
+3. npm v11.19.0 (installed with node.js).
+
 
 ## How to work with g1remake_lockpicker?
 
 After cloning repo's main branch, you can start the app:
 
-### Local start:
+### Local backend start:
 
 1. Install the requirements with ```pip install requirements.txt```.
 2. Navigate to g1remake_lockpicker\backend\app directory.
@@ -164,3 +170,17 @@ After cloning repo's main branch, you can start the app:
   ]
 }
 ```
+
+
+
+### Local frontend start:
+
+Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
+The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
+
+1. Navigate to g1remake_lockpicker\frontend directory.
+2. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
+
+
+
+
