@@ -5,6 +5,7 @@
 1. This project is developed on Python 3.13.5.
 2. Node.js v24.21.0 (https://nodejs.org/en/download/).
 3. npm v11.19.0 (installed with node.js).
+4. axios v1.20.0 (installed with ```npm install axios```)
 
 
 ## How to work with g1remake_lockpicker?
@@ -180,7 +181,7 @@ The app creation relies on the https://www.digitalocean.com/community/tutorials/
 
 1. Navigate to g1remake_lockpicker\frontend directory.
 2. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
-
+3. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
 
