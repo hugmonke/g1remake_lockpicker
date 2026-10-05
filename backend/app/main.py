@@ -10,8 +10,6 @@ from solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 
 app = FastAPI()
 
-app.mount('/static', StaticFiles(directory="../../frontend/build/static"), 'static')
-
 origins = [
     "http://localhost:3000",
     "localhost:3000"

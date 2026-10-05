@@ -13,13 +13,13 @@
 After cloning repo's main branch, you can start the app:
 
 ### Local backend start:
-
-1. Install the requirements with ```pip install requirements.txt```.
-2. Navigate to g1remake_lockpicker\backend\app directory.
-3. To start the application, run ```uvicorn main:app --reload```.
-4. In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
-5. To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
-6. Input the lock parameters into the 'Request body' window. You may copy the test body: 
+1. Navigate to g1remake_lockpicker\backend directory.
+2. Install the requirements with ```pip install requirements.txt```.
+3. Navigate to g1remake_lockpicker\backend\app directory.
+4. To start the application, run ```uvicorn main:app --reload```.
+5. In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
+6. To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
+7. Input the lock parameters into the 'Request body' window. You may copy the test body: 
 ```
 {
   "lock_state": {
@@ -34,7 +34,7 @@ After cloning repo's main branch, you can start the app:
   }
 }
 ```
-7. The request should result in a response:
+8. The request should result in a response:
 ```
 {
   "lock state": [
@@ -97,29 +97,19 @@ After cloning repo's main branch, you can start the app:
         5
       ],
       [
-        6,
-        2,
-        5
-      ],
-      [
-        6,
-        3,
-        6
-      ],
-      [
-        5,
-        3,
-        5
-      ],
-      [
         4,
-        3,
+        2,
         4
       ],
       [
         3,
-        3,
+        2,
         3
+      ],
+      [
+        2,
+        2,
+        2
       ]
     ],
     [
@@ -148,14 +138,6 @@ After cloning repo's main branch, you can start the app:
         "direction": "L"
       },
       {
-        "slider_idx": 0,
-        "direction": "R"
-      },
-      {
-        "slider_idx": 1,
-        "direction": "R"
-      },
-      {
         "slider_idx": 2,
         "direction": "L"
       },
@@ -179,9 +161,11 @@ After cloning repo's main branch, you can start the app:
 Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
 The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
 
-1. Navigate to g1remake_lockpicker\frontend directory.
-2. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
-3. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
+1. Open first terminal and start your local backend.
+2. Open the second terminal while the one with backend is running, and navigate to g1remake_lockpicker/frontend directory.
+3. Run ```npm install``` to install the create-react dependencies from package-lock.json.
+4. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
+5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
 
