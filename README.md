@@ -50,7 +50,7 @@ If you don't want to start frontend, you can use automatically generated FastAPI
   }
 }
 ```
-8. The request should result in a response:
+4. The request should result in a response:
 ```
 {
   "lock state": [
