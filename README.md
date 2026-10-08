@@ -13,14 +13,15 @@
 After cloning repo's main branch, you can start the app:
 
 ## Local backend start:
-1. Navigate to g1remake_lockpicker\backend directory.
-2. Install the requirements with ```pip install requirements.txt```.
-3. Navigate to g1remake_lockpicker\backend\app directory.
+1. Navigate to g1remake_lockpicker/backend directory.
+2. Install the requirements with ```pip install requirements.txt``` or, if using conda: ```conda install --file requirements.txt```
+3. Navigate to g1remake_lockpicker/backend/app directory.
 4. To start the application, run ```uvicorn main:app --reload```.
+5. In your browser, search ```http://127.0.0.1:8000/```.
 
 
 ## Local frontend start:
-Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
+Useful commands and description is located in g1remake_lockpicker/frontend/README.md.
 The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
 
 1. Open first terminal and start your local backend.

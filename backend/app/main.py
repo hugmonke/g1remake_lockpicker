@@ -39,7 +39,7 @@ async def index(lock_state: LockState, lock_config: LockConfig):
    config = LockConfiguration(rules = lock_config.start_lock_config) # {0:(1,0,0),1:(0,1,1),2:(1,0,1)}
    start = LockStartState(state = lock_state.start_lock_state) # (1,2,6)
    
-   end = tuple(2 for _ in range(len(config.rules.items())))
+   end = tuple(3 for _ in range(len(config.rules.items())))
    graph = Graph(config=config)
    solver = Solution(end_state=end)
    path = solver.bfs(graph=graph, start=start)
