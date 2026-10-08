@@ -17,9 +17,22 @@ After cloning repo's main branch, you can start the app:
 2. Install the requirements with ```pip install requirements.txt```.
 3. Navigate to g1remake_lockpicker\backend\app directory.
 4. To start the application, run ```uvicorn main:app --reload```.
-5. In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
-6. To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
-7. Input the lock parameters into the 'Request body' window. You may copy the test body: 
+# Testing with automatic API docs
+4.1 In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
+4.2 To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
+4.3 Input the lock parameters into the 'Request body' window. You may copy the test body: 
+
+### Local frontend start:
+Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
+The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
+
+1. Open first terminal and start your local backend.
+2. Open the second terminal while the one with backend is running, and navigate to g1remake_lockpicker/frontend directory.
+3. Run ```npm install``` to install the create-react dependencies from package-lock.json.
+4. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
+5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
+
+
 ```
 {
   "lock_state": {
@@ -156,16 +169,7 @@ After cloning repo's main branch, you can start the app:
 
 
 
-### Local frontend start:
 
-Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
-The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
-
-1. Open first terminal and start your local backend.
-2. Open the second terminal while the one with backend is running, and navigate to g1remake_lockpicker/frontend directory.
-3. Run ```npm install``` to install the create-react dependencies from package-lock.json.
-4. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
-5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
 
