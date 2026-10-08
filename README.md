@@ -18,13 +18,6 @@ After cloning repo's main branch, you can start the app:
 3. Navigate to g1remake_lockpicker\backend\app directory.
 4. To start the application, run ```uvicorn main:app --reload```.
 
-### Testing with automatic API docs
-
-4.1 In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
-
-4.2 To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
-
-4.3 Input the lock parameters into the 'Request body' window. You may copy the test body: 
 
 ## Local frontend start:
 Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
@@ -37,6 +30,12 @@ The app creation relies on the https://www.digitalocean.com/community/tutorials/
 5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
+### Testing with automatic API docs
+If you don't want to start frontend, you can use automatically generated FastAPI documentation for testing.
+
+1. In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
+2. To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
+3. Input the lock parameters into the 'Request body' window. You may copy the test body: 
 ```
 {
   "lock_state": {
