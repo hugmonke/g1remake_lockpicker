@@ -12,17 +12,18 @@
 
 After cloning repo's main branch, you can start the app:
 
-### Local backend start:
+# Local backend start:
 1. Navigate to g1remake_lockpicker\backend directory.
 2. Install the requirements with ```pip install requirements.txt```.
 3. Navigate to g1remake_lockpicker\backend\app directory.
 4. To start the application, run ```uvicorn main:app --reload```.
-# Testing with automatic API docs
+
+### Testing with automatic API docs
 4.1 In your browser, search ```http://127.0.0.1:8000/docs```. This command will open a page with automatic API documentation.
 4.2 To send a request for solving a lock puzzle, click on the POST /lock_input and select "Try it out".
 4.3 Input the lock parameters into the 'Request body' window. You may copy the test body: 
 
-### Local frontend start:
+# Local frontend start:
 Useful commands and description is located in g1remake_lockpicker\frontend\README.md.
 The app creation relies on the https://www.digitalocean.com/community/tutorials/build-a-to-do-application-using-django-and-react#step-3-setting-up-the-frontend tutorial.
 
