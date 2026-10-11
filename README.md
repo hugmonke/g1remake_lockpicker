@@ -27,7 +27,7 @@ The app creation relies on the https://www.digitalocean.com/community/tutorials/
 1. Open first terminal and start your local backend.
 2. Open the second terminal while the one with backend is running, and navigate to g1remake_lockpicker/frontend directory.
 3. Run ```npm install``` to install the create-react dependencies from package-lock.json.
-4. Run ```npm start```. You can now view the app in the browser;  Local: http://localhost:3000,   On Your Network:  http://192.168.0.46:3000.
+4. Run ```npm start```. You can now view the app in the browser: http://localhost:3000.
 5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
