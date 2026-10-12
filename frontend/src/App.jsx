@@ -61,11 +61,12 @@ function App() {
 
   function drawResColumn(move, idx) {
     return (
-      <div key={idx} style={{ display: "flex", alignItems: "center", gap: "1rem", padding: "0.5rem", background: "#a19f9d", borderRadius: "4px", border: "1px solid #ddd" }}>
+      
+      <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "0.5rem", background: "#a19f9d", borderRadius: "4px", border: "1px solid #ddd" }}>
         <span style={{ fontWeight: "bold", minWidth: "30px", color: "#130901" }}>{idx + 1}.</span>
         <span style={{ minWidth: "45px", color: "#000000", fontWeight: "500" }}>{move.direction === "L" ? `${move.slider_idx + 1}L` : `${move.slider_idx + 1}R`}</span>
-        <div style={{ display: "grid", gap: "0.3rem", flexWrap: "wrap" }}>
-          {states[idx + 1]?.map((pin  , i) => (<div key={i} title={`Pin ${i}`}>{drawLock(pin, i === move.slider_idx)}</div>))}
+        <div style={{ display: "grid", gap: "0.3rem", flexWrap: "wrap", justifyItems: "center", width: "100%" }}>
+          {states[idx + 1]?.map((pin  , i) => (<div key={i} title={`Slider ${i}`}>{drawLock(pin, i === move.slider_idx)}</div>))}
         </div>
       </div>
     );
@@ -73,7 +74,18 @@ function App() {
 
   function drawLock(pinValue, isHighlighted) {
     // Draws locks in both init state preview and result steps
+    const holeStep = 32; // 30px (hole) + 2px (gap)
+    const transX = holeStep*Number(pinValue+2);
+
     return (
+      <div
+        style={{
+          position: "relative",
+          display: "flex",
+          overflow: "hidden",
+          width: "500px"
+        }}
+      >
       <div 
         // Slider
         style={{ 
@@ -81,14 +93,16 @@ function App() {
           gap: "2px", // Holes gaps
           background: isHighlighted ? "#7e3a3a" : "#927777", 
           padding: "3px", 
-          borderRadius: "5px", //Corner rounding
-          border: "4px solid #7e3a3a"
+          borderRadius: "5px", // Corner rounding
+          border: "4px solid #7e3a3a",
+          transform: `translateX(${transX}px)`
         }}
       >
         {
           Array.from({ length: 7 }).map(
+            // Hole
             (_, holeIdx) => {
-              const hasBolt = holeIdx === Number(pinValue);
+              const hasBolt = 6-holeIdx === Number(pinValue);
               return (
                 <div
                   key={holeIdx}
@@ -107,6 +121,8 @@ function App() {
           )
         }
       </div>
+    
+      </div>
     );
   }
 
@@ -121,18 +137,18 @@ function App() {
         <div style={{ flex: "0 1 0px" }}>
           <div>
             <h3>Lock State (1 - 7)</h3>
-            {lockState.map((slideVal, sliderIdx) => (
+            {lockState.map((pinVal, sliderIdx) => (
               <div key={sliderIdx} style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-                <label style={{ width: "50px" }}>Pin {sliderIdx+1}:</label>
+                <label style={{ width: "50px", whiteSpace: "nowrap"  }}>Slider {sliderIdx+1}:</label>
                 <input
                   type="range"
                   min="0"
                   max="6"
-                  value={slideVal}
+                  value={pinVal}
                   onChange={(slideInput) => sliderChange(sliderIdx, slideInput.target.value)}
                   style={{ flex: 1 }}
                 />
-                <span style={{ fontWeight: "bold", width: "20px" }}>{slideVal+1}</span>
+                <span style={{ fontWeight: "bold", width: "20px" }}>{pinVal+1}</span>
               </div>
             ))}
 
@@ -158,7 +174,7 @@ function App() {
               <thead>
                 <tr>
                   <th></th>
-                  {Array.from({ length: 7 }).map((__, colNum) => (<th key={colNum} style={{ padding: "4px 8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slide {colNum+1}</th>)) /* Python equivalent: headers = [{"Slide": col, "label": f"Slide {col}"} for col in range(7)] */} 
+                  {Array.from({ length: 7 }).map((__, colNum) => (<th key={colNum} style={{ padding: "4px 8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slider {colNum+1}</th>)) /* Python equivalent: headers = [{"Slide": col, "label": f"Slide {col}"} for col in range(7)] */} 
                 </tr>
               </thead>
               <tbody>
@@ -166,7 +182,7 @@ function App() {
                   const rowNum = Number(rowIdx);
                   return (
                     <tr key={rowIdx}>
-                      <td style={{ fontWeight: "bold", paddingRight: "8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slide {rowNum+1}</td>
+                      <td style={{ fontWeight: "bold", paddingRight: "8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slider {rowNum+1}</td>
                       {lockConfig[rowIdx].map((configValue, colIdx) => {
                         const isDiagonal = rowNum === colIdx;
                         return (
