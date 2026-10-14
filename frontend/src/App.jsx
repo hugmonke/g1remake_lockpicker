@@ -61,12 +61,13 @@ function App() {
 
   function drawResColumn(move, idx) {
     return (
-      
-      <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "0.5rem", background: "#a19f9d", borderRadius: "4px", border: "1px solid #ddd" }}>
-        <span style={{ fontWeight: "bold", minWidth: "30px", color: "#130901" }}>{idx + 1}.</span>
-        <span style={{ minWidth: "45px", color: "#000000", fontWeight: "500" }}>{move.direction === "L" ? `${move.slider_idx + 1}L` : `${move.slider_idx + 1}R`}</span>
-        <div style={{ display: "grid", gap: "0.3rem", flexWrap: "wrap", justifyItems: "center", width: "100%" }}>
-          {states[idx + 1]?.map((pin  , i) => (<div key={i} title={`Slider ${i}`}>{drawLock(pin, i === move.slider_idx)}</div>))}
+      <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "0.5rem", background: "#221c1a", borderRadius: "4px", border: "1px solid #4a3b35", boxShadow: "inset 0 1px 5px #793c33" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid #382c28", paddingBottom: "0.5rem" }}>
+          <span style={{ fontWeight: "bold", fontSize: "1.3rem", color: "#e2ae59" }}>Step {idx + 1}.</span>
+          <span style={{ background: "#3d261d", color: "#f4a261", padding: "2px 8px", borderRadius: "4px", fontSize: "1.2rem", fontWeight: "bold", border: "1px solid #8d5b4c" }}>{move.direction === "L" ? `${move.slider_idx + 1}L` : `${move.slider_idx + 1}R`}</span>
+        </div>
+        <div style={{ display: "grid", gap: "0.4rem", flexWrap: "wrap", justifyItems: "center", width: "100%" }}>
+          {states[idx + 1]?.map((pin, i) => (<div key={i} title={`Slider ${i}`}>{drawLock(pin, i === move.slider_idx)}</div>))}
         </div>
       </div>
     );
@@ -83,7 +84,11 @@ function App() {
           position: "relative",
           display: "flex",
           overflow: "hidden",
-          width: "500px"
+          width: "500px",
+          background: "#110c0c",
+          borderRadius: "10px",
+          padding: "2px",
+          border: "2px solid #251717"
         }}
       >
       <div 
@@ -91,10 +96,10 @@ function App() {
         style={{ 
           display: "flex", 
           gap: "2px", // Holes gaps
-          background: isHighlighted ? "#7e3a3a" : "#927777", 
+          background: isHighlighted ? "#604828" : "#473030", 
           padding: "3px", 
           borderRadius: "5px", // Corner rounding
-          border: "4px solid #7e3a3a",
+          border: `4px solid ${isHighlighted ? "#b07430" : "#6c5959"}`,
           transform: `translateX(${transX}px)`
         }}
       >
@@ -110,11 +115,12 @@ function App() {
                     width: "30px",
                     height: "30px",
                     borderRadius: "40px",
-                    background: hasBolt ? "#461400" : "#8b8a8a",
+                    background: hasBolt ? "#a98467" : "#110c0c",
                     display: "flex",
-                    border: "1px solid #461400"
+                    border: ` ${hasBolt ? "6px solid #110c0c" : "1px solid #4a3b35"}`
                   }}
                 >
+                  
                 </div>
               );
             }
@@ -127,34 +133,37 @@ function App() {
   }
 
   return (
-    <div style={{ padding: "6rem", fontFamily: "serif", backgroundColor: "#310d0d", color: "#ffffff" }}>
-      <h1>Gothic 1 Remake Lock Solver</h1>
+    <div style={{ zoom: "0.65", padding: "3rem 3rem", fontFamily: "Georgia, serif", backgroundColor: "#140f0f", color: "#cfbebe" }}>
+      <h1 style = {{color: "#e2ae59", borderBottom: "2px solid #392922"}}>Gothic Remake Lockpick Solver</h1>
 
       {/* Page layout */}
       <div style={{ display: "flex", gap: "12rem", flexWrap: "wrap" }}>
         
         {/* Left: Initial state and dependencies */}
-        <div style={{ flex: "0 1 0px" }}>
+        <div style={{ flex: "0 1 10px" }}>
           <div>
-            <h3>Lock State (1 - 7)</h3>
+            <h3 style = {{paddingTop: "0.5rem", paddingBottom: "0.5rem"}}>Initial Lock State</h3>
             {lockState.map((pinVal, sliderIdx) => (
-              <div key={sliderIdx} style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "1rem" }}>
-                <label style={{ width: "50px", whiteSpace: "nowrap"  }}>Slider {sliderIdx+1}:</label>
+              <div key={sliderIdx} style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "2rem", borderRadius: "10px", border: "5px solid #3a2b2b", padding: "0.3rem 1rem", background: "#211818" }}>
+                <label style={{ width: "70px", whiteSpace: "nowrap", fontSize: "20px", color: "#cfbebe"  }}>Slider {sliderIdx+1}:</label>
+                
                 <input
+                
                   type="range"
                   min="0"
                   max="6"
                   value={pinVal}
                   onChange={(slideInput) => sliderChange(sliderIdx, slideInput.target.value)}
-                  style={{ flex: 1 }}
+                  style={{ flex: 1, accentColor: "#e2ae59"}}
                 />
+                
                 <span style={{ fontWeight: "bold", width: "20px" }}>{pinVal+1}</span>
               </div>
             ))}
 
             {/* Initial state preview */}
-            <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#a19f9d", borderRadius: "4px", border: "5px solid #000000" }}>
-              <div style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#000000" }}>Current State Preview:</div>
+            <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#211818", borderRadius: "30px", border: "5px solid #3a2b2b" }}>
+              <div style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#e2ae59" }}>Initial State Preview:</div>
               <div style={{ display: "grid", gap: "0.3rem" }}>
                 {
                   lockState.map((slideVal, sliderIdx) => (
@@ -168,9 +177,9 @@ function App() {
           </div>
 
           {/* Lock dependencies */}
-          <div style={{ marginTop: "3rem" }}>
+          <div style={{ marginTop: "3rem", color: "#cfbebe" }}>
             <h3>Lock Dependencies</h3>
-            <table style={{ borderCollapse: "collapse"}}>
+            <table style={{ borderCollapse: "collapse" }}>
               <thead>
                 <tr>
                   <th></th>
@@ -192,12 +201,14 @@ function App() {
                               disabled={isDiagonal}
                               onChange={(configInput) => configChange(rowIdx, colIdx, configInput.target.value)}
                               style={{
-                                color: "#000000",
+                                color: isDiagonal ? "#554141" : "#cfbebe" ,
                                 fontSize: "30px",
                                 padding: "4px",
-                                backgroundColor: isDiagonal ? "#ab8989" : "#aba5a5",
+                                backgroundColor: isDiagonal ? "#171111" : "#211818",
                                 fontWeight: isDiagonal ? "bold" : "normal",
-                                cursor: isDiagonal ? "not-allowed" : "pointer"
+                                cursor: isDiagonal ? "not-allowed" : "pointer",
+                                borderRadius: "8px",
+                                border: "4px solid #3a2b2b"
                               }}
                             >
                               <option value={-1}> -1</option>
@@ -215,18 +226,30 @@ function App() {
           </div>
 
           <div style={{ marginTop: "2rem" }}>
-            <button onClick={sendLock} style={{ padding: "0.75rem 1.5rem", fontSize: "1rem", cursor: "pointer" }}>
+            <button onClick={sendLock} 
+            disabled={isSolving}
+            style={{ 
+              padding: "1rem 2rem",
+               fontSize: "2rem", 
+               fontWeight: "bold",
+               borderRadius: "15px",
+               border: `4px solid ${isSolving ? "#030202" : "#3a2b2b"}`,
+               cursor: isSolving ? "default" : "pointer",
+               color: "#e2ae59",
+               backgroundColor: isSolving ? "#0f0b0b" : "#211818 ",
+               minWidth: "725px"       
+               }}>
               {isSolving ? "Solving..." : "Solve"}
             </button>
           </div>
         </div>
 
         {/* Right: Result display */}
-        <div style={{ flex: "1 1 500px" }}>
+        <div style={{ flex: "1 1 auto" }}>
           {result && (
-            <div style={{ background: "#b79483", padding: "2rem", borderRadius: "40px", width: "100%", boxSizing: "border-box" }}>
+            <div style={{ background: "#251c1c", padding: "2rem", borderRadius: "40px", border: "1px solid #000000", width: "100%", boxSizing: "border-box" }}>
 
-              <h3 style={{ color: "#000000" }}>
+              <h3 style={{ color: "#e2ae59" }}>
                 Result:
               </h3>
         
