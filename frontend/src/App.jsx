@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
-  const [lockState, setLockState] = useState([0, 0, 0, 0, 0, 0, 0]);
+  const [lockState, setLockState] = useState([3, 3, 3, 3, 3, 3, 3]);
   const [lockConfig, setLockConfig] = useState(
     {
       0: [1, 0, 0, 0, 0, 0, 0], 
@@ -14,7 +14,8 @@ function App() {
       6: [0, 0, 0, 0, 0, 0, 1]
     }
   );
-  
+  const [solveButtonColor, setSolveColor] = useState("#211818");
+  const [holeColor, setHoleColor] = useState("#ffffff");
   const [result, setResult] = useState(null);
   const [isSolving, setIsSolving] = useState(false);
   const states = result?.solution?.[0] || [];
@@ -40,7 +41,7 @@ function App() {
     setLockState(newLockState);
   }
   
-  const [lockDependencies, setDependencies] = useState([{ targetSlider: 0, sourceSlider: 1, direction: 1 }]);
+  const [lockDependencies, setDependencies] = useState([]);
   
   function configChange(rowIndex, colIndex, value) {
     setLockConfig(function(prev) {
@@ -138,14 +139,15 @@ function App() {
           <span style={{ background: "#3d261d", color: "#f4a261", padding: "2px 8px", borderRadius: "4px", fontSize: "1.2rem", fontWeight: "bold", border: "1px solid #8d5b4c" }}>{move.direction === "L" ? `${move.slider_idx + 1}L` : `${move.slider_idx + 1}R`}</span>
         </div>
         <div style={{ display: "grid", gap: "0.4rem", flexWrap: "wrap", justifyItems: "center", width: "100%" }}>
-          {states[idx + 1]?.map((pin, i) => (<div key={i} title={`Slider ${i}`}>{drawLock(pin, i === move.slider_idx)}</div>))}
+          {states[idx + 1]?.map((pin, i) => (<div key={i} title={`Slider ${i}`}>{<DrawLock pinValue={pin} isHighlighted={i === move.slider_idx}/>}</div>))}
         </div>
       </div>
     );
   }
 
-  function drawLock(pinValue, isHighlighted) {
+  function DrawLock({ pinValue, isHighlighted, onHoleClick }) {
     // Draws locks in both init state preview and result steps
+    const [hoverIdx, setHoverIdx] = useState(null); // to use "useState" inside a function, it had to be declared as a React component :(
     const holeStep = 32; // 30px (hole) + 2px (gap)
     const transX = holeStep*Number(pinValue+2);
 
@@ -179,17 +181,24 @@ function App() {
           Array.from({ length: 7 }).map(
             // Hole
             (_, holeIdx) => {
-              const hasBolt = 6-holeIdx === Number(pinValue);
+              const boltValue = 6-holeIdx
+              const hasBolt = boltValue === Number(pinValue);
+              const isHovered = hoverIdx === holeIdx;
+              
               return (
                 <div
                   key={holeIdx}
+                  onMouseEnter={() => onHoleClick && setHoverIdx(holeIdx)} // So called Short-circuit evaluation lmao https://en.wikipedia.org/wiki/Short-circuit_evaluation
+                  onMouseLeave={() => setHoverIdx(null)}
+                  onClick={() => onHoleClick && onHoleClick(boltValue)}
                   style={{
                     width: "30px",
                     height: "30px",
                     borderRadius: "40px",
-                    background: hasBolt ? "#a98467" : "#110c0c",
+                    background: hasBolt ? "#a98467" : (isHovered ? "#66503f" : "#110c0c"),
                     display: "flex",
-                    border: ` ${hasBolt ? "6px solid #110c0c" : "1px solid #4a3b35"}`
+                    border: ` ${hasBolt ? "6px solid #110c0c" : (isHovered ? "6px solid #110c0c" :"1px solid #4a3b35")}`,
+                    cursor: onHoleClick ? "pointer" : "default"
                   }}
                 >
                   
@@ -214,33 +223,16 @@ function App() {
         {/* Left: Initial state and dependencies */}
         <div style={{ flex: "0 1 10px" }}>
           <div>
-            <h3 style = {{paddingTop: "0.5rem", paddingBottom: "0.5rem"}}>Initial Lock State</h3>
-            {lockState.map((pinVal, sliderIdx) => (
-              <div key={sliderIdx} style={{ marginBottom: "1rem", display: "flex", alignItems: "center", gap: "2rem", borderRadius: "10px", border: "5px solid #3a2b2b", padding: "0.3rem 1rem", background: "#211818" }}>
-                <label style={{ width: "70px", whiteSpace: "nowrap", fontSize: "20px", color: "#cfbebe"  }}>Slider {sliderIdx+1}:</label>
-                
-                <input
-                
-                  type="range"
-                  min="0"
-                  max="6"
-                  value={pinVal}
-                  onChange={(slideInput) => sliderChange(sliderIdx, slideInput.target.value)}
-                  style={{ flex: 1, accentColor: "#e2ae59"}}
-                />
-                
-                <span style={{ fontWeight: "bold", width: "20px" }}>{pinVal+1}</span>
-              </div>
-            ))}
 
             {/* Initial state preview */}
             <div style={{ marginTop: "1.5rem", padding: "1rem", background: "#211818", borderRadius: "30px", border: "5px solid #3a2b2b" }}>
-              <div style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#e2ae59" }}>Initial State Preview:</div>
+              <div style={{ fontSize: "2rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#e2ae59" }}>Set Initial State:</div>
+              <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "0.5rem", color: "#cfbebe" }}>Hover over the hole and click where the bolt should be for each slider.</div>
               <div style={{ display: "grid", gap: "0.3rem" }}>
                 {
                   lockState.map((slideVal, sliderIdx) => (
                     <div key={sliderIdx}>
-                      {drawLock(slideVal, false)}
+                      {<DrawLock pinValue={slideVal} isHighligted={false} onHoleClick={(slideInput) => sliderChange(sliderIdx, slideInput)}/>}
                     </div>
                   ))
                 }
@@ -254,9 +246,24 @@ function App() {
           <div style={{ marginTop: "3rem", color: "#cfbebe" }}>
             <h3>Lock Dependencies</h3>
                 
+          <button // Add dependency button
+            onClick={addDependency}
+            style={{
+              padding: "6px 12px",
+              fontSize: "16px",
+              backgroundColor: "#3a2b2b",
+              color: "#e2ae59",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              marginLeft: "1.2rem"
+            }}
+          > + Add
+          </button>
           {lockDependencies.map((rule, idx) => (
 
-          <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem", padding: "0.8rem 1rem", backgroundColor: "#211818", borderRadius: "12px", border: "4px solid #3a2b2b", flexWrap: "wrap", gap: "5px", fontSize: "20px" }}>
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem", marginTop: "1rem" , padding: "0.8rem 1rem", backgroundColor: "#211818", borderRadius: "12px", border: "4px solid #3a2b2b", flexWrap: "wrap", gap: "5px", fontSize: "20px" }}>
           <span>Slider no.</span>
           <select 
             value={rule.targetSlider}
@@ -306,27 +313,17 @@ function App() {
             }}
           >- Delete
           </button>
-            
-          <button // Add dependency button
-            onClick={addDependency}
-            style={{
-              padding: "6px 12px",
-              fontSize: "16px",
-              backgroundColor: "#3a2b2b",
-              color: "#e2ae59",
-              border: "none",
-              borderRadius: "6px",
-              cursor: "pointer",
-              fontWeight: "bold"
-            }}
-          > + Add
-          </button>
+
+          
           </div>
           </div>
           ))}
           </div>
-
-          <div style={{ marginTop: "2rem" }}>
+          
+          <div style={{ marginTop: "2rem" }}
+              onMouseEnter={() => setSolveColor("#171111")}
+              onMouseLeave={() => setSolveColor("#211818")}
+          >
             <button onClick={sendLock} 
             disabled={isSolving}
             style={{ 
@@ -337,8 +334,8 @@ function App() {
                border: `4px solid ${isSolving ? "#030202" : "#3a2b2b"}`,
                cursor: isSolving ? "default" : "pointer",
                color: "#e2ae59",
-               backgroundColor: isSolving ? "#0f0b0b" : "#211818 ",
-               minWidth: "725px"       
+               backgroundColor: isSolving ? "#0f0b0b" : `${solveButtonColor}`,
+               minWidth: "725px"
                }}>
               {isSolving ? "Solving..." : "Solve"}
             </button>
