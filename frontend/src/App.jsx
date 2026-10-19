@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 
 function App() {
@@ -14,6 +14,7 @@ function App() {
       6: [0, 0, 0, 0, 0, 0, 1]
     }
   );
+  
   const [result, setResult] = useState(null);
   const [isSolving, setIsSolving] = useState(false);
   const states = result?.solution?.[0] || [];
@@ -21,44 +22,114 @@ function App() {
   const midStep = Math.ceil(moves.length / 2);
   const leftMoves = moves.slice(0, midStep);
   const rightMoves = moves.slice(midStep);
-
+  const selectStyle = {
+    color: "#cfbebe",
+    fontSize: "20px",
+    padding: "4px 8px",
+    backgroundColor: "#211818",
+    fontWeight: "normal",
+    cursor: "pointer",
+    borderRadius: "8px",
+    border: "3px solid #3a2b2b",
+    fontFamily: "Georgia, serif",
+    margin: "0 6px"
+  };
   function sliderChange(index, value) {
     const newLockState = [...lockState];
     newLockState[index] = Number(value);
     setLockState(newLockState);
   }
-
+  
+  const [lockDependencies, setDependencies] = useState([{ targetSlider: 0, sourceSlider: 1, direction: 1 }]);
+  
   function configChange(rowIndex, colIndex, value) {
     setLockConfig(function(prev) {
       const updatedConfig = { ...prev };
-      const updatedRow = prev[rowIndex].map(function(val, cIdx) {
-        if (cIdx === colIndex) {
-          return Number(value);
-        } else {
-          return val;
-        }
-      });
+      const updatedRow = [...prev[rowIndex]];
+      updatedRow[colIndex] = value;
       updatedConfig[rowIndex] = updatedRow;
-
       return updatedConfig;
     });
   }
 
+
+  const [errorMessage, setErrorMessage] = useState(null);
   async function sendLock() {
     setIsSolving(true);
+    setResult(null);
     try {
       const response = await axios.post("http://localhost:8000/lock_input", {
         lock_state: { start_lock_state: lockState },
         lock_config: { start_lock_config: lockConfig },
       });
-      setResult(response.data);
+
+      if (!response.data.solution) {
+        setErrorMessage("No solutions found!");
+      } else {
+        setErrorMessage(null)
+        setResult(response.data);
+      }
+
     } catch(error) {
+      if (error.response && error.response.data && error.response.data.detail) {
+        setErrorMessage(`Error: ${error.response.data.detail}`);
+      } else {
+        setErrorMessage("An unexpected error occurred while trying to solve the lock :(");
+      }
       console.error("Error sending data to API:", error);
     } finally {
       setIsSolving(false)
     }
   }
+  
+  useEffect(() => {
+    const baseConfig = {
+      0: [1, 0, 0, 0, 0, 0, 0], 
+      1: [0, 1, 0, 0, 0, 0, 0], 
+      2: [0, 0, 1, 0, 0, 0, 0], 
+      3: [0, 0, 0, 1, 0, 0, 0], 
+      4: [0, 0, 0, 0, 1, 0, 0], 
+      5: [0, 0, 0, 0, 0, 1, 0], 
+      6: [0, 0, 0, 0, 0, 0, 1]
+    };
+    setLockConfig(baseConfig);
+    lockDependencies.forEach((dependency) => {
+      const row = Number(dependency.targetSlider);
+      const col = Number(dependency.sourceSlider);
+      const val = Number(dependency.direction);
+      configChange(row, col, val)
+    });
+  }, [lockDependencies]);
 
+  function lockDependenciesChange(idx, key, val) {
+    const newLockDependencies = [...lockDependencies];
+    const dependency = newLockDependencies[idx];
+    const value = Number(val);
+
+    if (key === "targetSlider") {
+      if (value === Number(dependency.sourceSlider)) {
+        dependency.sourceSlider = Number(dependency.targetSlider);
+      }
+      dependency.targetSlider = value;
+    } else if (key === "sourceSlider") {
+        if (value === Number(dependency.targetSlider)) {
+          dependency.targetSlider = Number(dependency.sourceSlider);
+        }
+        dependency.sourceSlider = value;
+      } else {
+        dependency[key] = val;
+    }
+
+    setDependencies(newLockDependencies);
+  }
+
+  function addDependency() {
+    setDependencies([...lockDependencies, { targetSlider: 0, sourceSlider: 1, direction: 1 }]);
+  }
+
+  function delDependency(index) {
+    setDependencies(lockDependencies.filter((_, i) => i !== index));
+  }
   function drawResColumn(move, idx) {
     return (
       <div key={idx} style={{ display: "flex", flexDirection: "column", gap: "0.75rem", padding: "0.5rem", background: "#221c1a", borderRadius: "4px", border: "1px solid #4a3b35", boxShadow: "inset 0 1px 5px #793c33" }}>
@@ -78,13 +149,14 @@ function App() {
     const holeStep = 32; // 30px (hole) + 2px (gap)
     const transX = holeStep*Number(pinValue+2);
 
+    
     return (
       <div
         style={{
           position: "relative",
           display: "flex",
           overflow: "hidden",
-          width: "500px",
+          width: "550px",
           background: "#110c0c",
           borderRadius: "10px",
           padding: "2px",
@@ -137,7 +209,7 @@ function App() {
       <h1 style = {{color: "#e2ae59", borderBottom: "2px solid #392922"}}>Gothic Remake Lockpick Solver</h1>
 
       {/* Page layout */}
-      <div style={{ display: "flex", gap: "12rem", flexWrap: "wrap" }}>
+      <div style={{ display: "flex", gap: "12rem", flexWrap: "wrap",  }}>
         
         {/* Left: Initial state and dependencies */}
         <div style={{ flex: "0 1 10px" }}>
@@ -167,7 +239,7 @@ function App() {
               <div style={{ display: "grid", gap: "0.3rem" }}>
                 {
                   lockState.map((slideVal, sliderIdx) => (
-                    <div key={sliderIdx} title={`Pin ${sliderIdx}`}>
+                    <div key={sliderIdx}>
                       {drawLock(slideVal, false)}
                     </div>
                   ))
@@ -176,53 +248,82 @@ function App() {
             </div>
           </div>
 
+
+
           {/* Lock dependencies */}
           <div style={{ marginTop: "3rem", color: "#cfbebe" }}>
             <h3>Lock Dependencies</h3>
-            <table style={{ borderCollapse: "collapse" }}>
-              <thead>
-                <tr>
-                  <th></th>
-                  {Array.from({ length: 7 }).map((__, colNum) => (<th key={colNum} style={{ padding: "4px 8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slider {colNum+1}</th>)) /* Python equivalent: headers = [{"Slide": col, "label": f"Slide {col}"} for col in range(7)] */} 
-                </tr>
-              </thead>
-              <tbody>
-                {Object.keys(lockConfig).map((rowIdx) => {
-                  const rowNum = Number(rowIdx);
-                  return (
-                    <tr key={rowIdx}>
-                      <td style={{ fontWeight: "bold", paddingRight: "8px", fontSize: "20px", whiteSpace: "nowrap" }}>Slider {rowNum+1}</td>
-                      {lockConfig[rowIdx].map((configValue, colIdx) => {
-                        const isDiagonal = rowNum === colIdx;
-                        return (
-                          <td key={colIdx} style={{ padding: "4px" }}>
-                            <select
-                              value={configValue}
-                              disabled={isDiagonal}
-                              onChange={(configInput) => configChange(rowIdx, colIdx, configInput.target.value)}
-                              style={{
-                                color: isDiagonal ? "#554141" : "#cfbebe" ,
-                                fontSize: "30px",
-                                padding: "4px",
-                                backgroundColor: isDiagonal ? "#171111" : "#211818",
-                                fontWeight: isDiagonal ? "bold" : "normal",
-                                cursor: isDiagonal ? "not-allowed" : "pointer",
-                                borderRadius: "8px",
-                                border: "4px solid #3a2b2b"
-                              }}
-                            >
-                              <option value={-1}> -1</option>
-                              <option value={0}>   0</option>
-                              <option value={1}>   1</option>
-                            </select>
-                          </td>
-                        );
-                      })}
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                
+          {lockDependencies.map((rule, idx) => (
+
+          <div style={{ display: "flex", alignItems: "center", marginBottom: "1rem", padding: "0.8rem 1rem", backgroundColor: "#211818", borderRadius: "12px", border: "4px solid #3a2b2b", flexWrap: "wrap", gap: "5px", fontSize: "20px" }}>
+          <span>Slider no.</span>
+          <select 
+            value={rule.targetSlider}
+            onChange={(el) => lockDependenciesChange(idx, "targetSlider", el.target.value)}
+            style={selectStyle}> 
+            {Array.from({ length: 7 }).map((_, i) => (
+              <option 
+                key={i} 
+                value={i}
+                // disabled={i === Number(rule.sourceSlider)}
+                >{i+1}
+            </option>))}
+          </select>
+          <span>moves in the</span>
+          <select 
+          value={rule.direction}
+          onChange={(el) => lockDependenciesChange(idx, "direction", el.target.value)}
+          style={selectStyle}>
+            <option value="-1">opposite</option>
+            <option value="1">same</option>
+          </select>
+          <span>direction as slider no. </span>
+          <select 
+            value={rule.sourceSlider}
+            onChange={(el) => lockDependenciesChange(idx, "sourceSlider", el.target.value)}
+            style={selectStyle}> 
+            {Array.from({ length: 7 }).map((_, i) => (
+              <option 
+                key={i} 
+                value={i}
+                // disabled={i === Number(rule.targetSlider)}
+                >{i+1}
+            </option>))}
+          </select>
+          <div style = {{display: "flex", justifyContent: "space-between", width: "100%"}}>
+          <button // Delete dependency button
+            onClick={() => delDependency(idx)}
+            style={{
+              padding: "6px 12px",
+              fontSize: "16px",
+              backgroundColor: "#3a2b2b",
+              color: "#e2ae59",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          >- Delete
+          </button>
+            
+          <button // Add dependency button
+            onClick={addDependency}
+            style={{
+              padding: "6px 12px",
+              fontSize: "16px",
+              backgroundColor: "#3a2b2b",
+              color: "#e2ae59",
+              border: "none",
+              borderRadius: "6px",
+              cursor: "pointer",
+              fontWeight: "bold"
+            }}
+          > + Add
+          </button>
+          </div>
+          </div>
+          ))}
           </div>
 
           <div style={{ marginTop: "2rem" }}>
@@ -246,6 +347,13 @@ function App() {
 
         {/* Right: Result display */}
         <div style={{ flex: "1 1 auto" }}>
+          {errorMessage && (
+            <div style={{ background: "#211818", padding: "2rem", borderRadius: "40px", border: "1px solid #000000", width: "100%", boxSizing: "border-box", marginTop: "50px" }}>
+              <h3 style={{ color: "#f4a261" }}>
+                {errorMessage}
+                </h3>
+            </div>
+          )}
           {result && (
             <div style={{ background: "#251c1c", padding: "2rem", borderRadius: "40px", border: "1px solid #000000", width: "100%", boxSizing: "border-box" }}>
 
