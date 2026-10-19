@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
-
+// TODO:
+// If a rule exists, it should not be possible to create the same rule!
+// If two sliders have a dependency, it should not be possible to create a different dependency for the same sliders! (same/opposite)
 function App() {
   const [lockState, setLockState] = useState([3, 3, 3, 3, 3, 3, 3]);
   const [lockConfig, setLockConfig] = useState(
