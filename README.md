@@ -6,11 +6,20 @@
 2. Node.js v24.21.0 (https://nodejs.org/en/download/).
 3. npm v11.19.0 (installed with node.js).
 4. axios v1.20.0 (installed with ```npm install axios```)
-
+5. Docker Desktop. (https://docs.docker.com/desktop/setup/install/windows-install/)  (if installed by wsl, make sure wsl is installed)
 
 # How to work with g1remake_lockpicker?
 
 After cloning repo's main branch, you can start the app:
+
+
+## Docker start:
+
+1. On the first docker start, or after any changes to the Dockerfile or compose.yml files: Run ```docker-compose up --build``` in the project root directory.
+   
+2. Normal backend and fronted start: Run ```docker-compose up``` in the project root directory.
+3. Backend is now running on: http://localhost:8000/, frontend is running on http://localhost:3000/.
+
 
 ## Local backend start:
 1. Navigate to g1remake_lockpicker/backend directory.
