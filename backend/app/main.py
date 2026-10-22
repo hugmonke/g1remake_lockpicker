@@ -6,7 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Tuple, Dict
 
-from solver.bfs import LockConfiguration, LockStartState, Graph, Solution
+from app.solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 
 app = FastAPI()
 
