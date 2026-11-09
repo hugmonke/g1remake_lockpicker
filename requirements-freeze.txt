@@ -1,5 +1,5 @@
 #
-#
+# these requirements can be installed with conda (optional)
 # Name                     Version          Build               Channel
 annotated-doc              0.0.5            py313haa95532_0
 annotated-types            0.7.0            py313haa95532_0
