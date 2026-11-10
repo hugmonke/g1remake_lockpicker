@@ -1,9 +1,5 @@
-# g1remake_lockpicker
-
-
-
-# How to work with g1remake_lockpicker?
-
+# Gothic 1 Remake - Lockpick solver
+## How to work with g1remake_lockpicker?
 After cloning repo's main branch, you can start the app:
 
 
@@ -11,15 +7,15 @@ After cloning repo's main branch, you can start the app:
 ### Prerequisites
    Docker Engine: https://docs.docker.com/engine/install/
    
-1. On the first docker start, or after any changes to package.json, requirements.txt or compose.yml files: Run ```docker compose up --build``` in the project root directory.
-2. Normal backend and frontend start: Run ```docker compose up``` in the project root directory. You can run ```docker compose up -d``` for the app to run in detached mode.
-3. Backend is now running on: http://glockpicker-backend:5555/, frontend is running on http://glockpicker-frontend:7777/.
+1. On the first docker start, or after any changes to ```package.json```, ```requirements.txt``` or ```compose.yml``` files: Run ```docker compose up --build``` in the project root directory.
+2. Run ```docker compose up``` in the project root directory. You can run ```docker compose up -d``` for the app to run in detached mode.
+3. Backend is now running on: ```http://glockpicker-backend:5555/```, frontend is running on ```http://glockpicker-frontend:7777/```.
 4. To stop the application, run ```docker compose down``` in other terminal, or in the same terminal if the app is in detached mode.
 
 
 ## Start without docker:
 ### Prerequisites:
-1. This project is developed on Python 3.13.5.
+1. Python 3.13.5.
 2. Node.js v24.21.0 (https://nodejs.org/en/download/).
 3. npm v11.19.0 (installed with node.js).
 4. axios v1.20.0 (installed with ```npm install axios```)
