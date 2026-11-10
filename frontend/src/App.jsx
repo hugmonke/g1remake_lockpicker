@@ -62,7 +62,7 @@ function App() {
     setResult(null);
     try {
       // INSTEAD OF LOCALHOST HERE MUST BE YOUR MACHINES IP
-      const response = await axios.post("http://glockpicker-backend:5555/lock_input", {
+      const response = await axios.post("http://192.168.33.100:5555/lock_input", {
         lock_state: { start_lock_state: lockState },
         lock_config: { start_lock_config: lockConfig },
       });
