@@ -1,6 +1,5 @@
 # Gothic 1 Remake - Lockpick solver
 ## How to work with g1remake_lockpicker?
-After cloning repo's main branch, you can start the app:
 
 
 ## Docker start:
