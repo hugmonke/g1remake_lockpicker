@@ -11,8 +11,9 @@ from app.solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 app = FastAPI()
 
 origins = [
-    "http://localhost:3000",
-    "localhost:3000"
+        "192.168.33.104",
+        "localhost:5555",
+        "*"
 ]
 
 

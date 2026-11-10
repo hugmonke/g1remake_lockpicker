@@ -2,15 +2,19 @@ version: '3.13.5'
 services:
   backend:
     build: ./backend
+    container_name: glockpicker-backend
+    restart: unless-stopped
     ports:
-      - "8000:8000"
+      - "5555:8000"
     volumes:
       - ./backend/app:/backend/app
 
   frontend:
     build: ./frontend
+    container_name: glockpicker-frontend
+    restart: unless-stopped
     ports:
-      - "3000:3000"
+      - "7777:3000"
     volumes:
       - ./frontend/src:/frontend/src
       - ./frontend/public:/frontend/public

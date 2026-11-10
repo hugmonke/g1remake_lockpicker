@@ -1,4 +1,13 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+.Python
+env/
+venv/
+ENV/
+.venv/
+.env
+.env.*
+!.env.example
+/backend/app/__pycache__
+/backend/tests/__pycache__
 
 # dependencies
 /node_modules
