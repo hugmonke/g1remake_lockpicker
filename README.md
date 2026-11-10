@@ -1,8 +1,6 @@
 # g1remake_lockpicker
 
-## Prerequisites
 
-1. Docker Desktop. (https://docs.docker.com/desktop/setup/install/windows-install/)  (if installed by wsl, make sure wsl is installed)
 
 # How to work with g1remake_lockpicker?
 
@@ -10,12 +8,13 @@ After cloning repo's main branch, you can start the app:
 
 
 ## Docker start:
-
-1. On the first docker start, or after any changes to package.json, requirements.txt or compose.yml files: Run ```docker-compose up --build``` in the project root directory.
+### Prerequisites
+   Docker Engine: https://docs.docker.com/engine/install/
    
-2. Normal backend and frontend start: Run ```docker-compose up``` in the project root directory. You can run ```docker-compose up -d``` for the app to run in detached mode.
-3. Backend is now running on: http://localhost:8000/, frontend is running on http://localhost:3000/.
-4. To stop the application, run ```docker-compose down``` in other terminal, or in the same terminal if the app is in detached mode.
+1. On the first docker start, or after any changes to package.json, requirements.txt or compose.yml files: Run ```docker compose up --build``` in the project root directory.
+2. Normal backend and frontend start: Run ```docker compose up``` in the project root directory. You can run ```docker compose up -d``` for the app to run in detached mode.
+3. Backend is now running on: http://glockpicker-backend:5555/, frontend is running on http://glockpicker-frontend:7777/.
+4. To stop the application, run ```docker compose down``` in other terminal, or in the same terminal if the app is in detached mode.
 
 
 ## Start without docker:
@@ -40,7 +39,7 @@ The app creation relies on the https://www.digitalocean.com/community/tutorials/
 1. Open first terminal and start your local backend.
 2. Open the second terminal while the one with backend is running, and navigate to g1remake_lockpicker/frontend directory.
 3. Run ```npm install``` to install the create-react dependencies from package-lock.json.
-4. Run ```npm start```. You can now view the app in the browser: http://localhost:3000.
+4. Run ```npm start```. You can now view the app in the browser: ```http://localhost:3000```.
 5. You can input the lock configuration into displayed fields and send the data with a button below. The button should return the lock solution.
 
 
