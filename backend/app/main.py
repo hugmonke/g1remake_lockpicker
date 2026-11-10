@@ -10,11 +10,7 @@ from app.solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 
 app = FastAPI()
 
-origins = [
-        "192.168.33.104",
-        "localhost:5555",
-        "*"
-]
+origins = ["*"]
 
 
 app.add_middleware(
