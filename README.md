@@ -1,5 +1,7 @@
 # Gothic 1 Remake - Lockpick solver
-## How to work with g1remake_lockpicker?
+## About
+
+Gothic 1 Remake introduced a novel lockpicking minigame that some players found too tedious for the rewards inside the chests. To help our fellow Gothic players, we created a simple, accessible solution. This repository contains a production-ready, Dockerized frontend and backend that deploys this tool to the web.
 
 
 ## Docker start:
