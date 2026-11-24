@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/g1remake_lockpicker/static/css/main.1476f436.css",
+    "main.js": "/g1remake_lockpicker/static/js/main.b013ca01.js",
+    "static/js/453.3852239a.chunk.js": "/g1remake_lockpicker/static/js/453.3852239a.chunk.js",
+    "index.html": "/g1remake_lockpicker/index.html",
+    "main.1476f436.css.map": "/g1remake_lockpicker/static/css/main.1476f436.css.map",
+    "main.b013ca01.js.map": "/g1remake_lockpicker/static/js/main.b013ca01.js.map",
+    "453.3852239a.chunk.js.map": "/g1remake_lockpicker/static/js/453.3852239a.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.1476f436.css",
+    "static/js/main.b013ca01.js"
+  ]
+}
