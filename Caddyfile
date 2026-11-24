@@ -1,4 +1,4 @@
-g1lockpicker.duckdns.org {
+gothic-lockpicker-backend.duckdns.org {
     reverse_proxy backend:8000
 
     header {

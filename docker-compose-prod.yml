@@ -17,10 +17,8 @@ services:
     build: ./backend
     container_name: glockpicker-backend
     restart: unless-stopped
-    ports:
-      - "5555:8000"
-    volumes:
-      - ./backend/app:/backend/app
+    expose:
+      - "8000"
 
 volumes:
   caddy_data:
