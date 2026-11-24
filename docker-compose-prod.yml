@@ -1,0 +1,27 @@
+version: '3.13.5'
+services:
+  caddy:
+      image: caddy:2
+      restart: unless-stopped
+      ports:
+        - "80:80"
+        - "443:443"
+      volumes:
+        - ./Caddyfile:/etc/caddy/Caddyfile:ro
+        - caddy_data:/data
+        - caddy_config:/config
+      depends_on:
+        - backend
+
+  backend:
+    build: ./backend
+    container_name: glockpicker-backend
+    restart: unless-stopped
+    ports:
+      - "5555:8000"
+    volumes:
+      - ./backend/app:/backend/app
+
+volumes:
+  caddy_data:
+  caddy_config:

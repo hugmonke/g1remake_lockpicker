@@ -1,23 +1,27 @@
 #place for api requests, eg fastapi
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Tuple, Dict
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
 
 from app.solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 
+limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
-
-origins = ["*"]
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=["https://hugmonke.github.io"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
 )
 
 
@@ -30,7 +34,8 @@ class LockConfig(BaseModel):
 
 
 @app.post("/lock_input")
-async def index(lock_state: LockState, lock_config: LockConfig):
+@limiter.limit("3/minute")
+async def index(request: Request, lock_state: LockState, lock_config: LockConfig):
 
    config = LockConfiguration(rules = lock_config.start_lock_config) # {0:(1,0,0),1:(0,1,1),2:(1,0,1)}
    start = LockStartState(state = lock_state.start_lock_state) # (1,2,6)
