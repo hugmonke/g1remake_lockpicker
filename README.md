@@ -35,9 +35,11 @@ sudo docker compose -f docker-compose-backend.yml up -d --build
 
 4. The API is now available over HTTPS at `https://<your-domain>/lock_input`, and the interactive documentation is at `https://<your-domain>/docs`.
 
+5. To stop the application, run `docker compose -f docker-compose-backend.yml down` in other terminal, or in the same terminal if the app is in detached mode.
+
 #### Deploying Frontend to GitHub Pages
 
-1. Create/update `frontend/.env.production` with your HTTPS backend domain.
+1. Create/update `frontend/.env.production` with your HTTPS backend domain and set `REACT_APP_API_URL=https://<your-domain>`
 2. Ensure `homepage` in `frontend/package.json` points to your GitHub Pages URL (`https://<GitHubName>.github.io/g1remake_lockpicker`)
 3. Build and deploy by running:
    ```bash
@@ -56,20 +58,19 @@ Frontend will be accessible at `https://<GitHubName>.github.io/g1remake_lockpick
 
 
 ### Option 2: Fullstack
-   
-1. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `compose.yml` files: Run 
+1. Set `const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5555"` in `frontend/src/App.jsx`
+2. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `compose.yml` files run 
 ```bash
 sudo docker compose -f docker-compose-full.yml up -d --build
 ``` 
 in the project root directory.
 
-2. Run `docker compose up` in the project root directory. You can run `docker compose up -d` for the app to run in detached mode.
 3. Backend is now running on: 
 * `http://glockpicker-backend:5555/`, 
 frontend is running on 
 * `http://glockpicker-frontend:7777/`.
 
-4. To stop the application, run `docker compose down` in other terminal, or in the same terminal if the app is in detached mode.
+4. To stop the application, run `docker compose -f docker-compose-full.yml down` in other terminal, or in the same terminal if the app is in detached mode.
 
 
 ## Start without docker
@@ -77,15 +78,14 @@ frontend is running on
 1. Python 3.13.5.
 2. Node.js v24.21.0 (https://nodejs.org/en/download/).
 3. npm v11.19.0 (installed with node.js).
-4. axios v1.20.0 (installed with `npm install axios`)
+4. axios v1.20.0 (installed with `npm install axios`).
 
 A modification of the files will also be needed (e.g. modifying `allow_origins` to include  `http://localhost:3000`)
 
 ### Local backend start:
 1. Navigate to g1remake_lockpicker/backend directory.
-2. Install the requirements with `pip install -r requirements.txt` or, if using conda: `conda install --file requirements.txt`
-3. Navigate to g1remake_lockpicker/backend/app directory.
-4. To start the FastAPI server, run `uvicorn main:app --reload`.
+2. Install the requirements with `pip install -r requirements.txt`.
+4. Start the FastAPI server with `uvicorn app.main:app --reload`.
 5. In your browser, search `http://127.0.0.1:8000/`.
 
 
@@ -183,19 +183,29 @@ If you don't want to start frontend, you can use automatically generated FastAPI
         5
       ],
       [
-        4,
+        6,
         2,
+        5
+      ],
+      [
+        6,
+        3,
+        6
+      ],
+      [
+        5,
+        3,
+        5
+      ],
+      [
+        4,
+        3,
         4
       ],
       [
         3,
-        2,
+        3,
         3
-      ],
-      [
-        2,
-        2,
-        2
       ]
     ],
     [
@@ -222,6 +232,14 @@ If you don't want to start frontend, you can use automatically generated FastAPI
       {
         "slider_idx": 2,
         "direction": "L"
+      },
+      {
+        "slider_idx": 0,
+        "direction": "R"
+      },
+      {
+        "slider_idx": 1,
+        "direction": "R"
       },
       {
         "slider_idx": 2,
