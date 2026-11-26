@@ -58,12 +58,12 @@ function App() {
 
   const [errorMessage, setErrorMessage] = useState(null);
   const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8000";
+
   async function sendLock() {
     setIsSolving(true);
     setResult(null);
     try {
-      // INSTEAD OF LOCALHOST HERE MUST BE YOUR MACHINES IP
-      const response = await axios.post(API_URL, {
+      const response = await axios.post(`${API_URL}/lock_input`, {
         lock_state: { start_lock_state: lockState },
         lock_config: { start_lock_config: lockConfig },
       });
