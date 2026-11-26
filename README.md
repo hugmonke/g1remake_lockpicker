@@ -71,7 +71,7 @@ in the project root directory.
 frontend is running on 
 * `http://localhost:7777/`.
 
-4. To stop the application, run `docker compose -f docker-compose-full.yml down` in other terminal, or in the same terminal if the app is in detached mode.
+5. To stop the application, run `docker compose -f docker-compose-full.yml down` in other terminal, or in the same terminal if the app is in detached mode.
 
 
 ## Start without docker
