@@ -8,6 +8,8 @@ ENV/
 !.env.example
 /backend/app/__pycache__
 /backend/tests/__pycache__
+/backend/solver/__pycache__
+*.pyc
 
 # dependencies
 /node_modules
