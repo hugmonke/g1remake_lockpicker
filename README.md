@@ -43,7 +43,6 @@ sudo docker compose -f docker-compose-backend.yml up -d --build
 2. Ensure `homepage` in `frontend/package.json` points to your GitHub Pages URL (`https://<GitHubName>.github.io/g1remake_lockpicker`)
 3. Build and deploy by running:
    ```bash
-   cd frontend
    npm install
    npm run deploy
    ```
@@ -60,14 +59,15 @@ Frontend will be accessible at `https://<GitHubName>.github.io/g1remake_lockpick
 ### Option 2: Fullstack
 1. Set `const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5555"` in `frontend/src/App.jsx`
 2. Add `http://localhost:7777` to `allow_origins` in `backend/app/main.py`
-3. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `docker-compose-full.yml.yml` files run 
+3. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `docker-compose-full.yml` files run 
 ```bash
 sudo docker compose -f docker-compose-full.yml up -d --build
 ``` 
 in the project root directory.
 
-3. Backend is now running on: 
-* `http://localhost:5555/`, 
+4. Backend is now running on: 
+* `http://localhost:5555/`,
+  
 frontend is running on 
 * `http://localhost:7777/`.
 
@@ -85,8 +85,8 @@ A modification of the files will also be needed (e.g. modifying `allow_origins` 
 ### Local backend start:
 1. Navigate to g1remake_lockpicker/backend directory.
 2. Install the requirements with `pip install -r requirements.txt`.
-4. Start the FastAPI server with `uvicorn app.main:app --reload`.
-5. In your browser, search `http://127.0.0.1:8000/`.
+3. Start the FastAPI server with `uvicorn app.main:app --reload`.
+4. In your browser, search `http://127.0.0.1:8000/`.
 
 
 ### Local frontend start:
