@@ -1,7 +1,6 @@
 #place for api requests, eg fastapi
 
-from fastapi import FastAPI, Query, Request
-from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Tuple, Dict
@@ -9,7 +8,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
-from app.solver.bfs import LockConfiguration, LockStartState, Graph, Solution
+from solver.bfs import LockConfiguration, LockStartState, Graph, Solution
 
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -34,7 +33,7 @@ class LockConfig(BaseModel):
 
 
 @app.post("/lock_input")
-@limiter.limit("3/minute")
+@limiter.limit("10/minute")
 async def index(request: Request, lock_state: LockState, lock_config: LockConfig):
 
    config = LockConfiguration(rules = lock_config.start_lock_config) # {0:(1,0,0),1:(0,1,1),2:(1,0,1)}
