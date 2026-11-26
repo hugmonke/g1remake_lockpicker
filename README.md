@@ -59,16 +59,17 @@ Frontend will be accessible at `https://<GitHubName>.github.io/g1remake_lockpick
 
 ### Option 2: Fullstack
 1. Set `const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5555"` in `frontend/src/App.jsx`
-2. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `compose.yml` files run 
+2. Add `http://localhost:7777` to `allow_origins` in `backend/app/main.py`
+3. On the first docker start, or after any changes to `package.json`, `requirements.txt` or `docker-compose-full.yml.yml` files run 
 ```bash
 sudo docker compose -f docker-compose-full.yml up -d --build
 ``` 
 in the project root directory.
 
 3. Backend is now running on: 
-* `http://glockpicker-backend:5555/`, 
+* `http://localhost:5555/`, 
 frontend is running on 
-* `http://glockpicker-frontend:7777/`.
+* `http://localhost:7777/`.
 
 4. To stop the application, run `docker compose -f docker-compose-full.yml down` in other terminal, or in the same terminal if the app is in detached mode.
 
@@ -78,7 +79,6 @@ frontend is running on
 1. Python 3.13.5.
 2. Node.js v24.21.0 (https://nodejs.org/en/download/).
 3. npm v11.19.0 (installed with node.js).
-4. axios v1.20.0 (installed with `npm install axios`).
 
 A modification of the files will also be needed (e.g. modifying `allow_origins` to include  `http://localhost:3000`)
 
